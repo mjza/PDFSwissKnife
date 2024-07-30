@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "MacCatalyst": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "framework": "net8.0-maccatalyst",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Windows": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "framework": "net8.0-windows10.0.19041.0",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
