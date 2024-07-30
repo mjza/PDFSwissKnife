@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PDFSwissKnife.Views.MainPage"
+             Title="PDF Merger &amp; Splitter">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+
+            <Button Text="Select PDFs to Merge"
+                    Clicked="OnSelectMergeFilesClicked"/>
+            <Button Text="Merge PDFs"
+                    Clicked="OnMergeFilesClicked"/>
+
+            <BoxView HeightRequest="20"/>
+
+            <Button Text="Select PDF to Split"
+                    Clicked="OnSelectSplitFileClicked"/>
+            <Button Text="Split PDF"
+                    Clicked="OnSplitFileClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
