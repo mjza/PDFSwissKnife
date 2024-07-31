@@ -3,20 +3,25 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using CommunityToolkit.Maui.Storage;
+using CommunityToolkit.Maui.Alerts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 public partial class MainPage : ContentPage
 {
 	private List<string> mergeFiles = new List<string>();
-	private string splitFile;
+	private string? splitFile;
 	private readonly Services.PdfLogic pdfLogic = new Services.PdfLogic();
 
-	public MainPage()
+	private readonly IFolderPicker folderPicker;
+
+	public MainPage(IFolderPicker folderPicker)
 	{
 		InitializeComponent();
+		this.folderPicker = folderPicker;
 	}
 
 	private async void OnSelectMergeFilesClicked(object sender, EventArgs e)
@@ -48,22 +53,30 @@ public partial class MainPage : ContentPage
 	{
 		try
 		{
+			Console.WriteLine("OnMergeFilesClicked invoked.");
 			if (mergeFiles.Any())
 			{
-				var result = await FilePicker.Default.PickAsync(new PickOptions
-				{
-					PickerTitle = "Select the output PDF file",
-					FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-					{
-						{ DevicePlatform.MacCatalyst, new[] { "public.folder" } },
-						{ DevicePlatform.WinUI, new[] { ".pdf" } }
-					})
-				});
+				var cancellationToken = new CancellationToken();
+				var result = await folderPicker.PickAsync(cancellationToken);
 
-				if (result != null)
+				if (result.IsSuccessful)
 				{
-					pdfLogic.MergePdfs(mergeFiles, result.FullPath);
-					await DisplayAlert("Success", "PDF files merged successfully.", "OK");
+					var outputPath = System.IO.Path.Combine(result.Folder.Path, "Merged.pdf");
+
+					// Check if the directory is writable
+					if (!IsDirectoryWritable(result.Folder.Path))
+					{
+						await DisplayAlert("Error", "No write permission to the selected folder.", "OK");
+						return;
+					}
+
+					pdfLogic.MergePdfs(mergeFiles, outputPath);
+					Console.WriteLine("PDF files merged successfully.");
+					await DisplayAlert("Success", "PDF files merged successfully. Saved as Merged.pdf", "OK");
+				}
+				else
+				{
+					await DisplayAlert("Error", $"The folder was not picked with error: {result.Exception.Message}", "OK");
 				}
 			}
 			else
@@ -78,6 +91,22 @@ public partial class MainPage : ContentPage
 		}
 	}
 
+	private bool IsDirectoryWritable(string path)
+	{
+		try
+		{
+			// Try to create a temporary file to check if the directory is writable
+			string tempFile = System.IO.Path.Combine(path, System.IO.Path.GetRandomFileName());
+			using (var fs = System.IO.File.Create(tempFile, 1, System.IO.FileOptions.DeleteOnClose))
+			{
+			}
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
 	private async void OnSelectSplitFileClicked(object sender, EventArgs e)
 	{
 		var result = await FilePicker.Default.PickAsync(new PickOptions
